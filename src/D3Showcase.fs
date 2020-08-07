@@ -76,6 +76,8 @@ let AddD3ElementsToContainer containerId =
         let svg =
           d3container
             .append("svg")
+            .attr("width", 50)
+            .attr("height", 50)
         svg
           .append("circle")
           .style("stroke", "gray")
