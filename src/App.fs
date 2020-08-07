@@ -46,8 +46,6 @@ let private update msg model =
 
 open System.Collections.Generic
 let private view model dispatch =
-                          D3ComponentShowcase.D3Component d3ContainerId2 {Color= model.Value; Count=model.IntValue; ColorSet = model.ColorSet }
-  (*
     Hero.hero [ Hero.IsFullHeight ]
         [ Hero.body [ ]
             [ Container.container [ ]
@@ -95,7 +93,6 @@ let private view model dispatch =
                           D3ComponentShowcase.D3Component d3ContainerId2 {Color= model.Value; Count=model.IntValue; ColorSet = model.ColorSet }
 
               ] ] ] ] ]
-              *)
 
 open Elmish.Debug
 open Elmish.HMR

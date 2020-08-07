@@ -81,13 +81,14 @@ let D3Component containerId (props: LocalModel) =
 
         svg.selectAll("text")
             .data(dataset2)
-            .enter()
-            .append("text")
-        // |> fun (selection:D3.Selection.Selection<obj,int,obj,obj> ) -> selection.enter() // Selection<obj,int,obj,obj>
-        // |> fun (element : D3.Selection.Selection<D3.Selection.EnterElement,int,obj,obj>) ->
-        //       element.append("text")
+            // .enter()
+            // .append("text")
+        |> fun (selection:D3.Selection.Selection<obj,int,obj,obj> ) -> selection.enter() // Selection<obj,int,obj,obj>
+        |> fun (element : D3.Selection.Selection<D3.Selection.EnterElement,int,obj,obj>) ->
+              element.append("text")
         // |> fun x -> x
-                     .text(fun x i -> sprintf "%O -- %O" x i)
+                    //  .text(fun x i -> sprintf "%O -- %O" x i)
+                     .text(fun x i-> i)
                     //  .attr("x", fun x -> x * (width/dataSetLength))
                      .attr("y", fun data -> height - (float data * 4.))
         |> ignore
