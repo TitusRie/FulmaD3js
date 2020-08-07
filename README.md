@@ -50,7 +50,12 @@ or just copy [D3js.fs](https://raw.githubusercontent.com/MangelMaxime/fable-d3js
 
 
 
-
+### Update packages
+To update all packages to their latest versions, possibly accros major versions and breaking your code use:
+```
+yarn upgrade --latest
+```
+For more info and more gentle upgrades see: https://classic.yarnpkg.com/en/docs/cli/upgrade/#toc-yarn-upgrade-package-latest-l-caret-tilde-exact-pattern
 
 ### Build for production
 
