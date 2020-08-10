@@ -42,7 +42,7 @@ let animateSecondStep (this:obj) =
     do D3.d3.select(this)
         .transition()
         .duration(4000.0)
-        .attr("r", 40)
+        .attr("r", 20)
         |> ignore
 
 let animateFirstStep (this:obj) =
@@ -50,68 +50,29 @@ let animateFirstStep (this:obj) =
         .transition()
         .delay(0.0)
         .duration(1500.0)
-        .attr("r", 10)
+        .attr("r", 2)
         .on("end", animateSecondStep)
         |> ignore
 
-let ChangeSvgElementsWithD3 =
-        D3.d3.selectAll("rect")
-            // .style("fill", "orange")
-            .style("stroke", "black")
-            .style("stroke-width", "2")
-            .on("mouseover", stroke "red")
-            .on("mouseout", stroke "green")
-            // .on("mouseover", fill "red")
-            // .on("mouseout", fill "green")
-            |> ignore
-        D3.d3.selectAll("circle")
-            .style("fill", "green")
-            .attr("width", 100)
-            .attr("height", 100)
-            |> ignore
-
-let AddD3ElementsToContainer containerId =
-        let d3container : D3.Selection.Selection<obj,obj,Browser.Types.HTMLElement,obj option> =
-              D3.d3.select(sprintf "#%s" containerId)
-        let svg =
-          d3container
-            .append("svg")
-            .attr("width", 50)
-            .attr("height", 50)
-        svg
-          .append("circle")
-          .style("stroke", "gray")
-          .style("fill", "purple")
-          .attr("r", 20)
-          .attr("cx", 22)
-          .attr("cy", 22)
-          .on("mouseover", fill "pink")
-          //.on("mouseover", thisFunc (fill "pink"))
-          .on("mouseout", fill "purple")
-          .on("mousedown", animateFirstStep)
-            |> ignore
-
 let ChangeCircleColorsWithD3 color =
-        D3.d3.select("#d3container circle").style("fill", color) |> ignore
         D3.d3.select("#d3circle").style("fill", color) |> ignore
 
 open Fable.React
-open Fable.React.Props
-let customCircle dispatch msg (xPos:int) (color:string) =
-                                circle [
-                                  Fable.React.Props.Id "d3circle"
-                                  Fable.React.Props.SVGAttr.Cx (sprintf "%d" xPos)
-                                  Fable.React.Props.SVGAttr.Cy "15"
-                                  Fable.React.Props.SVGAttr.R "10"
-                                  Fable.React.Props.SVGAttr.Fill color
-                                  Fable.React.Props.OnClick (fun _ -> dispatch (msg color))  ] []
 let customRect dispatch msg (xPos:int) (color:string) =
                                 rect [
                                   Fable.React.Props.SVGAttr.X (sprintf "%d" xPos)
                                   Fable.React.Props.SVGAttr.Y "5"
-                                  Fable.React.Props.SVGAttr.Width "20"
-                                  Fable.React.Props.SVGAttr.Height "20"
+                                  Fable.React.Props.SVGAttr.Width "25"
+                                  Fable.React.Props.SVGAttr.Height "25"
                                   Fable.React.Props.SVGAttr.Rx "5"
                                   Fable.React.Props.SVGAttr.Ry "5"
                                   Fable.React.Props.SVGAttr.Fill color
                                   Fable.React.Props.OnClick (fun _ -> dispatch (msg color)) ] []
+let customCircle dispatch msg (xPos:int) (color:string) =
+                                circle [
+                                  Fable.React.Props.Id "d3circle"
+                                  Fable.React.Props.SVGAttr.Cx (sprintf "%d" xPos)
+                                  Fable.React.Props.SVGAttr.Cy "25"
+                                  Fable.React.Props.SVGAttr.R "20"
+                                  Fable.React.Props.SVGAttr.Fill color
+                                  Fable.React.Props.OnClick (fun _ -> dispatch (msg color))  ] []

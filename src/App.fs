@@ -7,7 +7,7 @@ open Fulma
 open Fable.FontAwesome
 
 type Model =
-    { Value : string; IntValue : int; ColorSet : ResizeArray<string>}
+    { Value : string; IntValue : int; ColorSet : ResizeArray<string>; DataSet : ResizeArray<int>}
 
 type Msg =
     | Initialize
@@ -15,34 +15,38 @@ type Msg =
     | ChangeColor of string
     | ChangeValue of string
     | ChangeIntValue of int
-
-let init _ = { Value = ""; IntValue = 2; ColorSet =new ResizeArray<string>() }, Cmd.ofMsg Initialize
-let d3ContainerId1 = "d3container1"
-let d3ContainerId2 = "d3container2"
+let random = System.Random()
+let updateDataSetFromModel model =
+    while model.DataSet.Count > model.IntValue do model.DataSet.RemoveAt(model.DataSet.Count - 1)
+    while model.DataSet.Count < model.IntValue do model.DataSet.Add(random.Next(3,25))
+    model
+let circleData = new ResizeArray<D3ComponentShowcase.DataItem>()
+circleData.Add {ItemColor="red"; ItemYPos="0"}
+circleData.Add {ItemColor="green"; ItemYPos="-5"}
+circleData.Add {ItemColor="blue"; ItemYPos="5"}
+let init _ = { Value = ""; IntValue = 2; ColorSet =new ResizeArray<string>(); DataSet =new ResizeArray<int>()}, Cmd.ofMsg Initialize
+let d3ContainerId = "d3container"
 let private update msg model =
     match msg with
     | Initialize ->
-        D3Showcase.AddD3ElementsToContainer d3ContainerId1
-        // if we're too fast, D3 wouldn't find the elements to change, so we add a little delay (inspired by https://zaid-ajaj.github.io/the-elmish-book/#/chapters/commands/async-updates)
-        // However, there will be probably a better solution, maybe wait for the 'event' when rendering is completed?
+        // https://zaid-ajaj.github.io/the-elmish-book/#/chapters/commands/async-updates
         let initializeDelayedCmd (dispatch: Msg -> unit) : unit =
           let delayedDispatch = async {
-              do! Async.Sleep 1000
+              do! Async.Sleep 2000
               dispatch InitializeDelayed
           }
           Async.StartImmediate delayedDispatch
-        {model with Value = "initializing..."}, Cmd.ofSub initializeDelayedCmd
+        updateDataSetFromModel {model with Value = "initializing..."}, Cmd.ofSub initializeDelayedCmd
     | InitializeDelayed ->
-        D3Showcase.ChangeSvgElementsWithD3
         {model with Value = ""}, Cmd.none
     | ChangeValue newValue ->
         { model with Value = newValue }, Cmd.none
     | ChangeColor newValue ->
         D3Showcase.ChangeCircleColorsWithD3 newValue
-
+        circleData.Add({ItemColor= newValue; ItemYPos="0"})
         { model with Value = newValue }, Cmd.none
     | ChangeIntValue newValue ->
-        { model with IntValue = newValue}, Cmd.none
+        updateDataSetFromModel { model with IntValue = newValue}, Cmd.none
 
 open System.Collections.Generic
 let private view model dispatch =
@@ -52,47 +56,39 @@ let private view model dispatch =
                 [ Columns.columns [ Columns.CustomClass "has-text-centered" ]
                     [ Column.column [ Column.Width(Screen.All, Column.IsThreeFifths)
                                       Column.Offset(Screen.All, Column.IsOneFifth) ]
-                        [ Image.image [ Image.Is128x128
-                                        Image.Props [ Style [ Margin "auto"] ] ]
-                            [ img [ Src "assets/fulma_logo.svg" ] ]
-                          Field.div [ ]
-                            [ Label.label [ ]
-                                [ str "Enter your name" ]
-                              Control.div [ ]
-                                [ Input.text [ Input.OnChange (fun ev -> dispatch (ChangeValue ev.Value))
-                                               Input.Value model.Value
-                                               Input.Props [ AutoFocus true ] ] ] ]
-                          Content.content [ Content.Modifiers [] ]
-                            [ str "Hello, "
-                              str model.Value
-                              str " "
-                              Icon.icon [ ]
-                                [ Fa.i [ Fa.Regular.Smile ]
-                                    [ ] ] ]
-                          Container.container [ ] [
+                        [ Container.container [ ] [
                               svg [
                                 Fable.React.Props.SVGAttr.Width "150px"
                                 Fable.React.Props.SVGAttr.Height "30px"
                                 // Fable.React.Props.SVGAttr.ViewBox "-0.15 -0.65 10.3 10.3"; unbox ("width", "40%")
                                 ] [
-                                D3Showcase.customCircle dispatch ChangeColor 10 "pink"
-                                D3Showcase.customRect dispatch ChangeColor 30 "red"
-                                D3Showcase.customRect dispatch ChangeColor 60 "blue"
-                                D3Showcase.customRect dispatch ChangeColor 90 "green"
+                                D3Showcase.customRect dispatch ChangeColor 20 "red"
+                                D3Showcase.customRect dispatch ChangeColor 50 "blue"
+                                D3Showcase.customRect dispatch ChangeColor 80 "green"
 
-                              ] ]
-                          Container.container [ Container.Props [Id d3ContainerId1 ] ] [ ]
+                              ]
+                              br []
+                              svg [
+                                Fable.React.Props.SVGAttr.Width "150px"
+                                Fable.React.Props.SVGAttr.Height "50px"
+                                // Fable.React.Props.SVGAttr.ViewBox "-0.15 -0.65 10.3 10.3"; unbox ("width", "40%")
+                                ] [
+                                D3Showcase.customCircle dispatch ChangeColor 62 "pink"
+
+
+                              ]                               ]
                           Container.container [] [
+                                Control.div [ ]
+                                  [ FunctionComponentsShowcase.titleView  { Title = model.Value} ]
                                 Control.div [ ]
                                   [ FunctionComponentsShowcase.InteractiveView  {|model ={Title=model.Value} |}]
                                 Control.div [ ]
-                                  [ FunctionComponentsShowcase.view2 {|count =model.IntValue; update= FunctionComponentsShowcase.updateDisp dispatch ChangeIntValue |} ]
-                                Control.div [ ]
-                                  [ FunctionComponentsShowcase.myView  { Title = model.Value} ]
+                                  [ FunctionComponentsShowcase.UpDownButton {|count =model.IntValue; update= FunctionComponentsShowcase.updateDisp dispatch ChangeIntValue; delta= -1 |}
+                                    ofInt model.IntValue; str "Columns"
+                                    FunctionComponentsShowcase.UpDownButton {|count =model.IntValue; update= FunctionComponentsShowcase.updateDisp dispatch ChangeIntValue;  delta= +1|} ]
                           ]
-                          D3ComponentShowcase.D3Component d3ContainerId2 {Color= model.Value; Count=model.IntValue; ColorSet = model.ColorSet }
-                          D3ComponentShowcase.D3Barchart "d3barchart"
-
+                          D3ComponentShowcase.D3Component d3ContainerId {ColorSet=circleData}
+                          D3ComponentShowcase.D3Barchart "d3barchart" model.DataSet
               ] ] ] ] ]
 
 open Elmish.Debug

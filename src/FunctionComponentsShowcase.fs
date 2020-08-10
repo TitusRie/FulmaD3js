@@ -39,13 +39,14 @@ let InteractiveView =
         ]
     )
 
-let myView (props: LocalModel) =
+let titleView (props: LocalModel) =
     div [] [str props.Title]
 
-let view2 (props: {| count: int; update: int -> unit |}) =
+let UpDownButton (props: {| count: int; update: int -> unit; delta:int |}) =
       button
-        [ OnClick (fun _ -> props.count + 1 |> props.update) ]
-        [ str "Times clicked: "; ofInt props.count ]
+        [ OnClick (fun _ -> props.count + props.delta |> props.update)
+          Disabled (props.count + props.delta <= 0) ]
+        [ str <| sprintf "%+d" props.delta ]
 
 let updateDisp dispatch msg (intVal:int) =
     dispatch <| msg intVal
