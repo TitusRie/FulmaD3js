@@ -89,7 +89,8 @@ let private view model dispatch =
                                   Fable.React.Props.SVGAttr.Height "50px"
                                   // Fable.React.Props.SVGAttr.ViewBox "-0.15 -0.65 10.3 10.3"; unbox ("width", "40%")
                                  ] [
-                                D3Showcase.customCircle dispatch ChangeColor 62 "pink"
+                                D3Showcase.customCircle dispatch ChangeColor 30 "pink"
+                                D3Showcase.InteractiveCircle ( {XPos=75; Color="orange"})
                             ]
                         ]
                         Container.container [] [

@@ -39,7 +39,7 @@ let stroke style (this: obj) =
        |> ignore
 
 let animateSecondStep (this: obj) =
-    do D3.d3.select(this).transition().duration(4000.0).attr("r", 20)
+    do D3.d3.select(this).transition().duration(4000.0).attr("r", 25)
        |> ignore
 
 let animateFirstStep (this: obj) =
@@ -69,3 +69,23 @@ let customCircle dispatch msg (xPos: int) (color: string) =
              Fable.React.Props.SVGAttr.R "20"
              Fable.React.Props.SVGAttr.Fill color
              Fable.React.Props.OnClick(fun _ -> dispatch (msg color)) ] []
+
+type LocalModel = { XPos: int; Color: string }
+
+let InteractiveCircle =
+    FunctionComponent.Of(fun (props:LocalModel) ->
+        // Keep a value ref during component's life cycle, initialized to None
+        let selfRef = Hooks.useRef None
+
+        circle [ Fable.React.Props.Id "d3circle"
+                 Fable.React.Props.SVGAttr.Cx(sprintf "%d" (props.XPos))
+                 Fable.React.Props.SVGAttr.Cy "25"
+                 Fable.React.Props.SVGAttr.R "25"
+                 Fable.React.Props.SVGAttr.Fill (props.Color)
+                   // We can pass the ref object directly to the new RefHook prop
+                   // to get a reference to the actual button element in the browser's doom
+                 Fable.React.Props.RefValue selfRef
+                 Fable.React.Props.OnClick(fun _ -> animateFirstStep( selfRef.current.Value))
+        ]
+                 [ ]
+        )
