@@ -34,8 +34,8 @@ type System.Object with
 let fill style (this: obj) =
     do D3.d3.select(this).style("fill", style) |> ignore
 
-let stroke style (this: obj) =
-    do D3.d3.select(this).style("stroke", style)
+let strokeWidth thickness (this: obj) =
+    do D3.d3.select(this).style("stroke-width", thickness)
        |> ignore
 
 let animateSecondStep (this: obj) =
@@ -50,9 +50,25 @@ let ChangeCircleColorsWithD3 color =
     D3.d3.select("#d3circle").style("fill", color)
     |> ignore
 
+let AddHoverEffectWithD3() =
+        D3.d3.selectAll("rect, circle")
+            .style("stroke", "lightgray")
+            .on("mouseover", strokeWidth "2")
+            .on("mouseout", strokeWidth "0")
+            |> ignore
+let ShowUIHintWithD3(rectsCirclesContainerId) = // NOTE: unit param () is necessary to get the function executed
+        D3.d3.selectAll("circle")
+            .transition().delay(0.0).duration(100.0).attr("r", 20)
+            .transition().duration(200.0).attr("r", 25)
+            |> ignore
+        D3.d3.selectAll(sprintf "#%s rect" rectsCirclesContainerId)
+            .transition().delay(0.0).duration(100.0).attr("width", 20).attr("height", 20)
+            .transition().duration(200.0).attr("width", 25).attr("height", 25)
+            |> ignore
+
 open Fable.React
 
-let customRect dispatch msg (xPos: int) (color: string) =
+let customRect changeColor (xPos: int) (color: string) =
     rect [ Fable.React.Props.SVGAttr.X(sprintf "%d" xPos)
            Fable.React.Props.SVGAttr.Y "5"
            Fable.React.Props.SVGAttr.Width "25"
@@ -60,22 +76,22 @@ let customRect dispatch msg (xPos: int) (color: string) =
            Fable.React.Props.SVGAttr.Rx "5"
            Fable.React.Props.SVGAttr.Ry "5"
            Fable.React.Props.SVGAttr.Fill color
-           Fable.React.Props.OnClick(fun _ -> dispatch (msg color)) ] []
+           Fable.React.Props.OnClick(fun _ -> changeColor color) ] []
 
-let customCircle dispatch msg (xPos: int) (color: string) =
+let customCircle changeColor (xPos: int) (color: string) =
     circle [ Fable.React.Props.Id "d3circle"
              Fable.React.Props.SVGAttr.Cx(sprintf "%d" xPos)
              Fable.React.Props.SVGAttr.Cy "25"
              Fable.React.Props.SVGAttr.R "20"
              Fable.React.Props.SVGAttr.Fill color
-             Fable.React.Props.OnClick(fun _ -> dispatch (msg color)) ] []
+             Fable.React.Props.OnClick(fun _ -> changeColor color) ] []
 
-type LocalModel = { XPos: int; Color: string }
+type LocalModel = { XPos: int; Color: string; ChangeColor:string->unit }
 
 let InteractiveCircle =
     FunctionComponent.Of(fun (props:LocalModel) ->
         // Keep a value ref during component's life cycle, initialized to None
-        let selfRef = Hooks.useRef None
+        let selfRef = Hooks.useRef None // Hooks only work within function component
 
         circle [ Fable.React.Props.Id "d3circle"
                  Fable.React.Props.SVGAttr.Cx(sprintf "%d" (props.XPos))
@@ -85,7 +101,9 @@ let InteractiveCircle =
                    // We can pass the ref object directly to the new RefHook prop
                    // to get a reference to the actual button element in the browser's doom
                  Fable.React.Props.RefValue selfRef
-                 Fable.React.Props.OnClick(fun _ -> animateFirstStep( selfRef.current.Value))
+                 Fable.React.Props.OnClick(fun _ ->
+                        props.ChangeColor props.Color
+                        animateFirstStep( selfRef.current.Value))
         ]
                  [ ]
         )

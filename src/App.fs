@@ -43,22 +43,28 @@ let init _ =
     Cmd.ofMsg Initialize
 
 let d3ContainerId = "d3container"
+let rectsCirclesContainerId = "rectsCirclesContainerId"
 
 let private update msg model =
     match msg with
     | Initialize ->
+        D3Showcase.AddHoverEffectWithD3()
+
         // https://zaid-ajaj.github.io/the-elmish-book/#/chapters/commands/async-updates
         let initializeDelayedCmd (dispatch: Msg -> unit): unit =
             let delayedDispatch =
                 async {
-                    do! Async.Sleep 2000
+                    do! Async.Sleep 1500
                     dispatch InitializeDelayed
                 }
 
             Async.StartImmediate delayedDispatch
 
         updateDataSetFromModel { model with Value = "initializing..." }, Cmd.ofSub initializeDelayedCmd
-    | InitializeDelayed -> { model with Value = "" }, Cmd.none
+    | InitializeDelayed ->
+        // after delay all D3 elements will be in the DOM and can be changed
+        D3Showcase.ShowUIHintWithD3(rectsCirclesContainerId)
+        { model with Value = "" }, Cmd.none
     | ChangeValue newValue -> { model with Value = newValue }, Cmd.none
     | ChangeColor newValue ->
         D3Showcase.ChangeCircleColorsWithD3 newValue
@@ -75,22 +81,21 @@ let private view model dispatch =
                 Columns.columns [ Columns.CustomClass "has-text-centered" ] [
                     Column.column [ Column.Width(Screen.All, Column.IsThreeFifths)
                                     Column.Offset(Screen.All, Column.IsOneFifth) ] [
-                        Container.container [] [
+                        let dispatchChangeColor = fun color -> dispatch <| ChangeColor color
+                        Container.container [ Container.Props [ Id rectsCirclesContainerId ] ] [
                             svg [ Fable.React.Props.SVGAttr.Width "150px"
                                   Fable.React.Props.SVGAttr.Height "30px"
-                                  // Fable.React.Props.SVGAttr.ViewBox "-0.15 -0.65 10.3 10.3"; unbox ("width", "40%")
                                  ] [
-                                D3Showcase.customRect dispatch ChangeColor 20 "red"
-                                D3Showcase.customRect dispatch ChangeColor 50 "blue"
-                                D3Showcase.customRect dispatch ChangeColor 80 "green"
+                                D3Showcase.customRect dispatchChangeColor 20 "red"
+                                D3Showcase.customRect dispatchChangeColor 50 "blue"
+                                D3Showcase.customRect dispatchChangeColor 80 "green"
                             ]
                             br []
                             svg [ Fable.React.Props.SVGAttr.Width "150px"
                                   Fable.React.Props.SVGAttr.Height "50px"
-                                  // Fable.React.Props.SVGAttr.ViewBox "-0.15 -0.65 10.3 10.3"; unbox ("width", "40%")
                                  ] [
-                                D3Showcase.customCircle dispatch ChangeColor 30 "pink"
-                                D3Showcase.InteractiveCircle ( {XPos=75; Color="orange"})
+                                D3Showcase.customCircle dispatchChangeColor 35 "pink"
+                                D3Showcase.InteractiveCircle ( {XPos=85; Color="orange";ChangeColor=dispatchChangeColor})
                             ]
                         ]
                         Container.container [] [
@@ -113,7 +118,7 @@ let private view model dispatch =
                                        delta = 1 |}
                             ]
                         ]
-                        D3ComponentShowcase.D3Component d3ContainerId { ColorSet = circleData }
+                        D3ComponentShowcase.D3Component d3ContainerId { ColorSet = circleData;ChangeColor=dispatchChangeColor }
                         D3ComponentShowcase.D3Barchart "d3barchart" model.DataSet
                     ]
                 ]
