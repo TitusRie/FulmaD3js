@@ -48,7 +48,11 @@ or just copy [D3js.fs](https://raw.githubusercontent.com/MangelMaxime/fable-d3js
 > https://blog.vbfox.net/2018/02/06/fable-react-1-react-in-fable-land.html
 > https://fable.io/fable-graphics/samples/d3/barchart/index.html
 
-
+### Install Redux tools
+Install [Redux](http://extension.remotedev.io/)
+Otherwise you'll get error:
+```WebSocket connection to 'ws://localhost:8000/socketcluster/' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED```
+More info, see: https://github.com/MangelMaxime/fulma-demo/issues/25
 
 ### Update packages
 To update all packages to their latest versions, possibly accros major versions and breaking your code use:
